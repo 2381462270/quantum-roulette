@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>量子课堂观测系统 | 高二(7)班</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e6e6ff;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            text-align: center;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(15, 10, 40, 0.85);
+            box-shadow: 0 0 40px rgba(106, 90, 205, 0.7);
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 1px solid #4a3d9c;
+        }
+        
+        .header {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a3d9c;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            text-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #8a2be2, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .class-info {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            color: #bd93f9;
+        }
+        
+        .experiment-warning {
+            color: #ff5555;
+            font-weight: bold;
+            margin-top: 15px;
+            text-shadow: 0 0 8px rgba(255, 85, 85, 0.6);
+            font-size: 1.2rem;
+        }
+        
+        .formula-container {
+            margin: 30px 0;
+            padding: 25px 20px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 15px;
+            border: 1px solid #5d4da8;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .math-display {
+            font-size: 2.2rem;
+            margin: 10px 0;
+        }
+        
+        #displayArea {
+            min-height: 750px;
+            margin: 35px 0;
+            padding: 30px 20px;
+            font-size: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed #00ffff;
+            border-radius: 15px;
+            transition: all 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .result {
+            width: 100%;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(30, 15, 70, 0.4);
+        }
+        
+        .highlight {
+            color: #ff79c6;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 121, 198, 0.4
+            );
+            font-size: 2.2rem;
+        }
+        
+        .small {
+            font-size: 1.5rem;
+            opacity: 0.85;
+            margin-top: 15px;
+            font-style: italic;
+            color: #8be9fd;
+        }
+        
+        .special-result {
+            background: rgba(120, 0, 200, 0.25);
+            border: 2px solid #ff79c6;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px rgba(255, 121, 198, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(255, 121, 198, 0.9); }
+            100% { box-shadow: 0 0 5px rgba(255, 121, 198, 0.5); }
+        }
+        
+        button {
+            background: linear-gradient(to right, #8a2be2, #4b0082);
+            color: white;
+            border: none;
+            padding: 20px 55px;
+            font-size: 1.9rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.4s;
+            margin: 25px 0;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px #9400d3;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            transform: scale(0.98);
+        }
+        
+        .student-photo {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 50%;
+            border: 4px solid #bd93f9;
+            margin: 25px auto;
+            display: none;
+            object-fit: cover;
+            box-shadow: 0 0 30px rgba(189, 147, 249, 0.7);
+            z-index: 3;
+        }
+        
+        .special-bg {
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            color: white;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+        }
+        
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            z-index: 0;
+            animation: float 4s infinite ease-in-out;
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+            50% { transform: translate(0, -40px) scale(1.6); opacity: 0.3; }
+        }
+        
+        .quantum-signature {
+            margin-top: 20px;
+            font-size: 1.3rem;
+            opacity: 0.7;
+            font-style: italic;
+            color: #bd93f9;
+        }
+        
+        .control-panel {
+            background: rgba(20, 15, 50, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0 20px;
+            border: 1px solid #5d4da8;
+        }
+        
+        .control-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #50fa7b;
+            text-shadow: 0 0 8px rgba(80, 250, 123, 0.6);
+        }
+        
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        input {
+            padding: 15px 20px;
+            font-size: 1.6rem;
+            border-radius: 50px;
+            border: 2px solid #6a5acd;
+            background: rgba(10, 5, 30, 0.8);
+            color: white;
+            text-align: center;
+            width: 200px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            border-color: #ff79c6;
+            box-shadow: 0 0 15px rgba(255, 121, 198, 0.6);
+        }
+        
+        .small-btn {
+            padding: 15px 30px;
+            font-size: 1.6rem;
+            background: linear-gradient(to right, #6272a4, #44475a);
+        }
+        
+        .students-list {
+            background: rgba(10, 5, 30, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 1px solid #5d4da8;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .list-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #f1fa8c;
+            text-shadow: 0 0 8px rgba(241, 250, 140, 0.4);
+        }
+        
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            text-align: left;
+        }
+        
+        .student-item {
+            padding: 12px 15px;
+            background: rgba(30, 20, 60, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid #bd93f9;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .student-item:hover {
+            background: rgba(80, 60, 140, 0.6);
+            transform: translateY(-3px);
+        }
+        
+        .student-index {
+            display: inline-block;
+            width: 30px;
+            color: #ff79c6;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .special-student {
+            border-left: 4px solid #ff79c6;
+            background: rgba(120, 0, 200, 0.3);
+        }
+        
+        .photo-student {
+            border-left: 4px solid #50fa7b;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            opacity: 0.6;
+            padding: 15px;
+            color: #bd93f9;
+        }
+        
+        .students-list::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .students-list::-webkit-scrollbar-track {
+            background: rgba(10, 5, 30, 0.5);
+            border-radius: 10px;
+        }
+        
+        .students-list::-webkit-scrollbar-thumb {
+            background: #6272a4;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            #displayArea {
+                font-size: 1.7rem;
+                padding: 20px 15px;
+            }
+            
+            .highlight {
+                font-size: 1.8rem;
+            }
+            
+            button {
+                font-size: 1.6rem;
+                padding: 16px 40px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            input {
+                width: 90%;
+                max-width: 300px;
+            }
+            
+            .student-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particleContainer"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>量子课堂观测系统</h1>
+            <div class="class-info">高二(7)班 · 薛定谔特别实验</div>
+            <div class="experiment-warning">警告：观测行为将导致量子态坍缩</div>
+        </div>
+        
+        <div class="formula-container">
+            <div class="math-display">
+                \[
+                |\psi\rangle = \alpha|\text{懂}\rangle + \beta|\text{不懂}\rangle
+                \]
+            </div>
+        </div>
+        
+        <div id="displayArea">
+            <div class="result">量子系统待机中...<br>准备观测</div>
+        </div>
+        
+        <img id="studentPhoto" class="student-photo" alt="学生照片">
+        
+        <button id="observeBtn">启 动 量 子 观 测</button>
+        
+        <div class="quantum-signature">观测者: 郑老师 | 实验编号: QM-2025-08</div>
+        
+        <div class="control-panel">
+            <div class="control-title">高级观测控制</div>
+            <div class="input-group">
+                <input type="number" id="studentIndex" placeholder="输入学生序号" min="1" max="52">
+                <button id="selectBtn" class="small-btn">指定观测</button>
+            </div>
+        </div>
+        
+        <div class="students-list">
+            <div class="list-title">高二(7)班量子态列表</div>
+            <div class="student-grid" id="studentList">
+                <!-- 学生列表由JS动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">量子课堂观测系统 v1.0 | 基于量子力学基本原理</div>
+
+    <script>
+        // 绑定元素
+        const observeBtn = document.getElementById('observeBtn');
+        const selectBtn = document.getElementById('selectBtn');
+        const displayArea = document.getElementById('displayArea');
+        const studentPhoto = document.getElementById('studentPhoto');
+        const particleContainer = document.getElementById('particleContainer');
+        const studentIndexInput = document.getElementById('studentIndex');
+        const studentListContainer = document.getElementById('studentList');
+        
+        // 创建粒子效果
+        function createParticles(count) {
+            particleContainer.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 3}s`;
+                
+                const colors = ['#ff79c6', '#8be9fd', '#50fa7b', '#f1fa8c', '#bd93f9'];
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                const size = Math.random() * 12 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                particleContainer.appendChild(particle);
+            }
+        }
+        
+        // 生成学生列表HTML
+        function generateStudentList() {
+            let html = '';
+            students.forEach((student, index) => {
+                if (student.type === "header") return;
+                
+                let itemClass = "student-item";
+                if (student.special) itemClass += " special-student";
+                if (student.photo) itemClass += " photo-student";
+                
+                html += `
+                    <div class="${itemClass}" data-index="${index}">
+                        <span class="student-index">${index}.</span>
+                        <span>${student.name}</span>
+                    </div>
+                `;
+            });
+            studentListContainer.innerHTML = html;
+            
+            // 添加点击事件
+            document.querySelectorAll('.student-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    studentIndexInput.value = index + 1;
+                    selectStudent(index + 1);
+                });
+            });
+        }
+
+        // 高二(7)班学生数据 (根据花名册)
+        const students = [
+            { type: "header", name: "== 学生列表 ==" },
+            { name: "蔡卓源", index: 1 },
+            { 
+                name: "陈瑞阳",
+                index: 2,
+                photo: "cry.jpeg"  // 照片学生
+            },
+            { name: "陈祖旭", index: 3 },
+            { name: "池明慧", index: 4 },
+            { name: "邓子寒", index: 5 },
+            { name: "冯思颖", index: 6 },
+            { 
+                name: "郭旭灿",
+                index: 7,
+                photo: "gxc.jpg"  // 照片学生
+            },
+            { name: "黄闵昱茁", index: 8 },
+            { 
+                name: "黄睿行",
+                index: 9,
+                photo: "hrx.jpg"  // 照片学生
+            },
+            { name: "黄蔚然", index: 10 },
+            { name: "黄振轩", index: 11 },
+            { 
+                name: "黄子琪",
+                index: 12,
+                photo: "hzq.jpg"  // 照片学生
+            },
+            { name: "黄梓锟", index: 13 },
+            { name: "蒋景航", index: 14 },
+            { name: "李凯祺", index: 15 },
+            { name: "李战", index: 16 },
+            { name: "刘遥羽", index: 17 },
+            { name: "刘烨峰", index: 18 },
+            { name: "刘禹轩", index: 19 },
+            { 
+                name: "卢忠虎",
+                index: 20,
+                fixed: true,
+                understand: "100%",
+                state: "问题是啥？我不会，李战！",
+                coherence: "0.50",
+                photo: "",
+                special: true
+            },
+            
+            { 
+                name: "罗宇轩",
+                index: 21,
+                photo: "lyx.jpg"  // 照片学生
+            },
+            { 
+                name: "毛鑫宇",
+                index: 22,
+                photo: "mxy.jpg"  // 照片学生
+            },
+            { 
+                name: "潘宇亮",
+                index: 23,
+                photo: "pyl.jpg"  // 照片学生
+            },
+            { name: "覃子航", index: 24 },
+            { name: "邱昊宇", index: 25 },
+            { name: "沈可宸", index: 26 },
+            { name: "石嘉瑜", index: 27 },
+            { name: "宋谢永祥", index: 28 },
+            { name: "苏子杰", index: 29 },
+            { name: "谭钥", index: 30 },
+            { name: "汤子睿", index: 31 },
+            { name: "田地宽", index: 32 },
+            { name: "田子未", index: 33 },
+            { name: "王睿麒", index: 34 },
+            { name: "王文翟", index: 35 },
+            { name: "王胤禹", index: 36 },
+            { 
+                name: "魏震轩", 
+                index: 37,
+                photo: "wzx.jpg"  // 照片学生
+            },
+            { name: "吴彦孜", index: 38 },
+            { name: "谢宇晨", index: 39 },
+            { name: "熊琦薇", index: 40 },
+            { name: "熊徐宝仪", index: 41 },
+            { 
+                name: "许宇宸", 
+                index: 42,
+                photo: "xyc.jpg"  // 照片学生
+            },
+            { name: "杨筱羽", index: 43 },
+            { name: "杨子铭", index: 44 },
+            { name: "余印萱", index: 45 },
+            { 
+                name: "袁哲文",
+                index: 46,
+                fixed: true,
+                understand: "???%",
+                state: "未观测到，实验失败",
+                coherence: "???",
+                photo: "",
+                special: true
+            },
+            { 
+                name: "张锦宸",
+                index: 47,
+                photo: "zjc.jpg"  // 照片学生
+            },
+            { name: "张泽楷", index: 48 },
+            { name: "周鑫彤", index: 49 },
+            { name: "周奕晨", index: 50 },
+            { name: "周咏卓", index: 51 },
+            { 
+                name: "朱博",
+                index: 52,
+                photo: "zb.jpg"  // 照片学生
+            }
+        ];
+
+        // 量子观测函数
+        function quantumObserve(studentIndex = null) {
+            let selectedStudent;
+            
+            if (studentIndex === null) {
+                // 随机选人
+                const randomIndex = Math.floor(Math.random() * students.length);
+                selectedStudent = students[randomIndex];
+            } else {
+                // 指定学生（索引+1是因为第一个是header）
+                selectedStudent = students[studentIndex + 1];
+            }
+            
+            // 跳过标题行
+            if (!selectedStudent || selectedStudent.type === "header") {
+                if (studentIndex === null) {
+                    return quantumObserve();
+                } else {
+                    displayArea.innerHTML = `
+                        <div class="result">
+                            <div>⚠️ 观测失败 ⚠️</div>
+                            <div class="small">指定序号无效，请重新输入</div>
+                        </div>
+                    `;
+                    observeBtn.disabled = false;
+                    observeBtn.textContent = "启 动 量 子 观 测";
+                    return;
+                }
+            }
+            
+            let understandPercent, randomState, coherence;
+            
+            // 特殊学生
+            if (selectedStudent.fixed) {
+                understandPercent = selectedStudent.understand;
+                randomState = selectedStudent.state;
+                coherence = selectedStudent.coherence;
+                displayArea.classList.add('special-result');
+            } else {
+                // 普通学生
+                understandPercent = Math.floor(Math.random() * 40) + 60 + "%";
+                
+                const states = [
+                    "量子隧穿中", "波函数发散", "能级稳定", 
+                    "观测干扰强烈", "叠加态震荡", "量子纠缠中",
+                    "不确定性较高", "能级跃迁活跃", "退相干中",
+                    "量子涨落明显", "概率云扩散", "谐振子状态",
+                    "本征态不稳定", "波包扩散", "自旋极化"
+                ];
+                randomState = states[Math.floor(Math.random() * states.length)];
+                coherence = (Math.random() * 0.8 + 0.2).toFixed(2);
+                displayArea.classList.remove('special-result');
+            }
+            
+            // 显示结果
+            displayArea.innerHTML = `
+                <div class="result">
+                    <div>🚨 观测对象：<span class="highlight">${selectedStudent.name}</span></div>
+                    <div>📊 懂指数：<span class="highlight">${understandPercent}</span></div>
+                    <div>⚛️ 状态：${randomState}</div>
+                    <div class="small">（量子相干性：${coherence}）</div>
+                </div>
+            `;
+            
+            // 显示照片
+            if (selectedStudent.photo) {
+                studentPhoto.src = selectedStudent.photo;
+                studentPhoto.alt = `${selectedStudent.name}的照片`;
+                studentPhoto.style.display = 'block';
+                displayArea.classList.add('special-bg');
+                displayArea.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${selectedStudent.photo})`;
+            } else {
+                studentPhoto.style.display = 'none';
+                displayArea.style.backgroundImage = 'none';
+            }
+            
+            observeBtn.disabled = false;
+            observeBtn.textContent = "启 动 量 子 观 测";
+        }
+        
+        // 指定学生观测
+        function selectStudent(index) {
+            if (!index || index < 1 || index > 52) {
+                displayArea.innerHTML = `
+                    <div class="result">
+                        <div>⚠️ 观测失败 ⚠️</div>
+                        <div class="small">请输入1-52之间的有效序号</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            observeBtn.disabled = true;
+            observeBtn.textContent = "观测进行中...";
+            createParticles(40);
+            studentPhoto.style.display = 'none';
+            studentPhoto.src = "";
+            displayArea.innerHTML = "<div class='result'>指定量子态观测中...<br>正在定位目标</div>";
+            displayArea.classList.remove('special-bg', 'special-result');
+            displayArea.style.backgroundImage = 'none';
+            
+            setTimeout(() => {
+                quantumObserve(index - 1);
+            }, 2000);
+        }
+
+        // 初始化
+        function init() {
+            createParticles(30);
+            generateStudentList();
+            
+            // 随机观测按钮
+            observeBtn.addEventListener('click', function() {
+                createParticles(40);
+                studentPhoto.style.display = 'none';
+                studentPhoto.src = "";
+                displayArea.innerHTML = "<div class='result'>量子态叠加中...<br>正在计算概率波</div>";
+                displayArea.classList.remove('special-bg', 'special-result');
+                displayArea.style.backgroundImage = 'none';
+                observeBtn.disabled = true;
+                observeBtn.textContent = "观测进行中...";
+                setTimeout(() => quantumObserve(), 2000);
+            });
+            
+            // 指定观测按钮
+            selectBtn.addEventListener('click', function() {
+                const index = parseInt(studentIndexInput.value);
+                selectStudent(index);
+            });
+            
+            // 输入框回车键支持
+            studentIndexInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const index = parseInt(studentIndexInput.value);
+                    selectStudent(index);
+                }
+            });
+            
+            if (window.MathJax && window.MathJax.typeset) {
+                window.MathJax.typeset();
+            }
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
